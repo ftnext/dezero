@@ -1,4 +1,4 @@
-import numpy as np  # NOQA (for doctest)
+import numpy as np
 
 
 class Variable:
@@ -22,7 +22,7 @@ class Variable:
 class Function:
     """ある変数から別の変数への対応関係を定めるものである、関数の基底クラス
 
-    すべての関数に共通する機能を実装している
+    関数の入出力をVariableインスタンスで統一している（関数の連結が可能になる -> Exp関数で例示）
     """
 
     def __call__(self, input: Variable) -> Variable:
@@ -53,3 +53,21 @@ class Square(Function):
 
     def forward(self, x):
         return x ** 2
+
+
+class Exp(Function):
+    """e（自然対数の底）の'入力された値'乗を返す、具体的な関数
+
+    関数を連結した使用例: (e ** (x**2)) ** 2
+    >>> A, B, C = Square(), Exp(), Square()
+    >>> x = Variable(np.array(0.5))
+    >>> a = A(x)
+    >>> b = B(a)
+    >>> y = C(b)
+    >>> print(y.data)
+    1.648721270700128
+    """
+
+    def forward(self, x):
+        # https://numpy.org/doc/stable/reference/generated/numpy.exp.html
+        return np.exp(x)

@@ -76,7 +76,9 @@ class Exp(Function):
 def numerical_diff(f: Function, x: Variable, eps=1e-4):
     """中心差分近似を使って数値微分を求める関数
 
-    数値微分：微小な差異 eps を用いて関数の変化量を求める手法
+    数値微分：微小な差異 eps を用いて関数の変化量を求める手法。
+    1. 桁落ちによる誤差、2. 変数ごとに微分を求める（高い計算コスト）により、
+    バックプロパゲーションの実装の正しさの確認に使われる（勾配確認）
 
     >>> f = Square()
     >>> x = Variable(np.array(2.0))
@@ -90,3 +92,21 @@ def numerical_diff(f: Function, x: Variable, eps=1e-4):
     y0 = f(x0)
     y1 = f(x1)
     return (y1.data - y0.data) / (2 * eps)
+
+
+def f(x: Variable) -> Variable:
+    """(e ** (x**2)) ** 2を返す合成関数
+
+    合成関数の数値微分を求める
+    >>> x = Variable(np.array(0.5))
+    >>> dy = numerical_diff(f, x)
+    >>> print(dy)
+    3.2974426293330694
+
+    上の結果は、xを0.5から微小な値だけ変化させたら、
+    yは微小な値の3.297...倍だけ変化するということ (dy/dx=f'(x)=3.297)
+    """
+    A = Square()
+    B = Exp()
+    C = Square()
+    return C(B(A(x)))

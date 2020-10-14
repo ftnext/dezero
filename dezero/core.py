@@ -71,3 +71,22 @@ class Exp(Function):
     def forward(self, x):
         # https://numpy.org/doc/stable/reference/generated/numpy.exp.html
         return np.exp(x)
+
+
+def numerical_diff(f: Function, x: Variable, eps=1e-4):
+    """中心差分近似を使って数値微分を求める関数
+
+    数値微分：微小な差異 eps を用いて関数の変化量を求める手法
+
+    >>> f = Square()
+    >>> x = Variable(np.array(2.0))
+    >>> dy = numerical_diff(f, x)
+    >>> print(dy)
+    4.000000000004
+    """
+
+    x0 = Variable(x.data - eps)
+    x1 = Variable(x.data + eps)
+    y0 = f(x0)
+    y1 = f(x1)
+    return (y1.data - y0.data) / (2 * eps)

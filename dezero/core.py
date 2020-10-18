@@ -1,3 +1,14 @@
+"""
+連鎖率 dy/dx = ((dy/dy * dy/db) * db/da) * da/dx
+
+順伝播
+x -> A -> a -> B -> b -> C -> y
+
+逆伝播
+dy/dx <- A'(x) <- dy/da <- B'(a) <- dy/db <- C'(b) <- dy/dy(=1)
+※ A'(x) は A'(x)（=変数）の乗算 を表す（簡略化して表記）
+"""
+
 import numpy as np
 
 

@@ -27,25 +27,36 @@ class Variable:
     """
 
     def __init__(self, data):
-        self.data = data
+        self.data = data  # 通常値
+        self.grad = None  # 通常値に対応する微分値
 
 
 class Function:
     """ある変数から別の変数への対応関係を定めるものである、関数の基底クラス
 
     関数の入出力をVariableインスタンスで統一している（関数の連結が可能になる -> Exp関数で例示）
+
+    入力されたVariableを覚えることで、変数の通常値も微分値も参照できる
     """
 
     def __call__(self, input: Variable) -> Variable:
         x = input.data  # actual data
         y = self.forward(x)
         output = Variable(y)
+        self.input = input  # store input Variable
         return output
 
     def forward(self, x):
-        """具体的な計算
+        """通常の具体的な計算（順伝播）
 
         Functionクラスを継承した具体的な関数クラスで定義する
+        """
+        raise NotImplementedError
+
+    def backward(self, gy):
+        """微分を求めるための具体的な計算（逆伝播）
+
+        オブジェクト呼び出し(__call__)で設定されるself.inputを用いる
         """
         raise NotImplementedError
 

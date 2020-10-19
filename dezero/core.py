@@ -7,6 +7,10 @@ x -> A -> a -> B -> b -> C -> y
 逆伝播
 dy/dx <- A'(x) <- dy/da <- B'(a) <- dy/db <- C'(b) <- dy/dy(=1)
 ※ A'(x) は A'(x)（=変数）の乗算 を表す（簡略化して表記）
+⇔
+x.grad <- A.backward <- a.grad <- B.backward <- b.grad
+                                                    <- C.backward <- y.grad(=1)
+※ A.backwardに「A'(x)（=変数）の乗算」を内包している
 """
 
 import numpy as np
@@ -56,6 +60,8 @@ class Function:
     def backward(self, gy):
         """微分を求めるための具体的な計算（逆伝播）
 
+        計算グラフの簡略化の部分（A'(x)の乗算）を内包していて、
+        計算グラフではbackward関数の適用で済むようにしている（後述の逆伝播で微分を計算する例）。
         オブジェクト呼び出し(__call__)で設定されるself.inputを用いる
         """
         raise NotImplementedError
@@ -99,6 +105,14 @@ class Exp(Function):
     >>> y = C(b)
     >>> print(y.data)
     1.648721270700128
+
+    上記例で、逆伝播によってyの微分を求める
+    >>> y.grad = np.array(1.0)
+    >>> b.grad = C.backward(y.grad)
+    >>> a.grad = B.backward(b.grad)
+    >>> x.grad = A.backward(a.grad)
+    >>> print(x.grad)
+    3.297442541400256
     """
 
     def forward(self, x):

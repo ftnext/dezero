@@ -74,7 +74,18 @@ class Square(Function):
     """
 
     def forward(self, x):
+        """y = x ** 2"""
         return x ** 2
+
+    def backward(self, gy):
+        """dy/dx * gy
+
+        dy/dx = 2 * x
+        gyは出力側から渡される微分（ndarray）
+        """
+        x = self.input.data
+        gx = 2 * x * gy
+        return gx
 
 
 class Exp(Function):
@@ -91,8 +102,18 @@ class Exp(Function):
     """
 
     def forward(self, x):
+        """y = e ** x"""
         # https://numpy.org/doc/stable/reference/generated/numpy.exp.html
         return np.exp(x)
+
+    def backward(self, gy):
+        """dy/dx * gy
+
+        dy/dx = e ** x
+        """
+        x = self.input.data
+        gx = np.exp(x) * gy
+        return gx
 
 
 def numerical_diff(f: Function, x: Variable, eps=1e-4):

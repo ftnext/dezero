@@ -20,6 +20,7 @@ class Variable:
     """「箱」（データを持つ存在）としての変数を表すクラス
 
     data属性にデータが保持される
+    creator属性に計算グラフのつながりの情報が保持される
 
     >>> data = np.array(1.0)
     >>> x = Variable(data)
@@ -33,6 +34,10 @@ class Variable:
     def __init__(self, data):
         self.data = data  # 通常値
         self.grad = None  # 通常値に対応する微分値
+        self.creator = None  # 変数の生みの親となる関数（関数以外が生み出した変数の場合はNone）
+
+    def set_creator(self, func: "Function"):
+        self.creator = func
 
 
 class Function:
@@ -41,13 +46,17 @@ class Function:
     関数の入出力をVariableインスタンスで統一している（関数の連結が可能になる -> Exp関数で例示）
 
     入力されたVariableを覚えることで、変数の通常値も微分値も参照できる
+    順伝播が計算されるときに、箱（変数）に計算グラフのつながりを記録する
     """
 
-    def __call__(self, input: Variable) -> Variable:
+    def __call__(self, input: "Variable") -> "Variable":
         x = input.data  # actual data
         y = self.forward(x)
         output = Variable(y)
+        # make output Variable remember the creator Function
+        output.set_creator(self)
         self.input = input  # store input Variable
+        self.output = output  # store output Variable
         return output
 
     def forward(self, x):
@@ -113,6 +122,14 @@ class Exp(Function):
     >>> x.grad = A.backward(a.grad)
     >>> print(x.grad)
     3.297442541400256
+
+    自動で作られた計算グラフを逆向きに辿る
+    >>> assert y.creator == C
+    >>> assert y.creator.input == b
+    >>> assert y.creator.input.creator == B
+    >>> assert y.creator.input.creator.input == a
+    >>> assert y.creator.input.creator.input.creator == A
+    >>> assert y.creator.input.creator.input.creator.input == x
     """
 
     def forward(self, x):

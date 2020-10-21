@@ -130,6 +130,20 @@ class Exp(Function):
     >>> assert y.creator.input.creator.input == a
     >>> assert y.creator.input.creator.input.creator == A
     >>> assert y.creator.input.creator.input.creator.input == x
+
+    逆伝播を試す
+    >>> y.grad = np.array(1.0)
+    >>> C = y.creator  # 変数を作った関数を取得
+    >>> b = C.input  # 関数への入力を取得
+    >>> b.grad = C.backward(y.grad)
+    >>> B = b.creator
+    >>> a = B.input
+    >>> a.grad = B.backward(b.grad)
+    >>> A = a.creator
+    >>> x = A.input
+    >>> x.grad = A.backward(a.grad)
+    >>> print(x.grad)
+    3.297442541400256
     """
 
     def forward(self, x):

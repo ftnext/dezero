@@ -22,6 +22,8 @@ class Variable:
     data属性にデータが保持される
     creator属性に計算グラフのつながりの情報が保持される
 
+    backwardメソッドにより（関数のbackwardメソッドと連携して）逆伝播を求める
+
     >>> data = np.array(1.0)
     >>> x = Variable(data)
     >>> print(x.data)
@@ -38,6 +40,14 @@ class Variable:
 
     def set_creator(self, func: "Function"):
         self.creator = func
+
+    def backward(self):
+        f = self.creator  # get Function
+        # stop when self (Variable) is not created by Function
+        if f is not None:
+            x = f.input  # get input Variable of the Function
+            x.grad = f.backward(self.grad)
+            x.backward()  # call to the prior Variable recursively
 
 
 class Function:
@@ -115,15 +125,7 @@ class Exp(Function):
     >>> print(y.data)
     1.648721270700128
 
-    上記例で、逆伝播によってyの微分を求める
-    >>> y.grad = np.array(1.0)
-    >>> b.grad = C.backward(y.grad)
-    >>> a.grad = B.backward(b.grad)
-    >>> x.grad = A.backward(a.grad)
-    >>> print(x.grad)
-    3.297442541400256
-
-    自動で作られた計算グラフを逆向きに辿る
+    自動で作られた計算グラフを逆向きに辿る（Define-by-Run）
     >>> assert y.creator == C
     >>> assert y.creator.input == b
     >>> assert y.creator.input.creator == B
@@ -131,17 +133,9 @@ class Exp(Function):
     >>> assert y.creator.input.creator.input.creator == A
     >>> assert y.creator.input.creator.input.creator.input == x
 
-    逆伝播を試す
+    逆伝播を求める
     >>> y.grad = np.array(1.0)
-    >>> C = y.creator  # 変数を作った関数を取得
-    >>> b = C.input  # 関数への入力を取得
-    >>> b.grad = C.backward(y.grad)
-    >>> B = b.creator
-    >>> a = B.input
-    >>> a.grad = B.backward(b.grad)
-    >>> A = a.creator
-    >>> x = A.input
-    >>> x.grad = A.backward(a.grad)
+    >>> y.backward()
     >>> print(x.grad)
     3.297442541400256
     """

@@ -42,9 +42,8 @@ class Variable:
         self.creator = func
 
     def backward(self):
-        f = self.creator  # get Function
         # stop when self (Variable) is not created by Function
-        if f is not None:
+        if f := self.creator:  # get Function
             x = f.input  # get input Variable of the Function
             x.grad = f.backward(self.grad)
             x.backward()  # call to the prior Variable recursively

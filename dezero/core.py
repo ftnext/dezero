@@ -42,11 +42,16 @@ class Variable:
         self.creator = func
 
     def backward(self):
-        # stop when self (Variable) is not created by Function
-        if f := self.creator:  # get Function
-            x = f.input  # get input Variable of the Function
-            x.grad = f.backward(self.grad)
-            x.backward()  # call to the prior Variable recursively
+        funcs = [self.creator]
+        while funcs:
+            f = funcs.pop()  # get Function
+            # get input and output Variable of the Function
+            # f.output is self (for maintainability for branch of graph?)
+            x, y = f.input, f.output
+            x.grad = f.backward(y.grad)
+            # stop when x (Variable) is not created by Function
+            if x.creator is not None:
+                funcs.append(x.creator)  # append the prior Function
 
 
 class Function:

@@ -42,6 +42,12 @@ class Variable:
         self.creator = func
 
     def backward(self):
+        # https://numpy.org/doc/stable/reference/generated/numpy.ones_like.html
+        if self.grad is None:
+            # grad is ones because of dy/dy(= 1)
+            # data and grad are the same dtype
+            self.grad = np.ones_like(self.data)
+
         funcs = [self.creator]
         while funcs:
             f = funcs.pop()  # get Function
@@ -138,7 +144,6 @@ class Exp(Function):
     >>> assert y.creator.input.creator.input.creator.input == x
 
     逆伝播を求める
-    >>> y.grad = np.array(1.0)
     >>> y.backward()
     >>> print(x.grad)
     3.297442541400256
@@ -212,7 +217,6 @@ def exp(x):
     例：通常の数値計算を行うような感覚で計算できる
     >>> x = Variable(np.array(0.5))
     >>> y = square(exp(square(x)))  # 関数を連続して適用
-    >>> y.grad = np.array(1.0)
     >>> y.backward()
     >>> print(x.grad)
     3.297442541400256

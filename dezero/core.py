@@ -196,3 +196,25 @@ def f(x: Variable) -> Variable:
     B = Exp()
     C = Square()
     return C(B(A(x)))
+
+
+def square(x):
+    """2乗するFunctionをPythonの関数として利用できるようにする
+
+    Squareクラスのインスタンスを作って、そのインスタンスを呼び出すという手間を省略している
+    """
+    return Square()(x)
+
+
+def exp(x):
+    """指数関数のFunctionをPythonの関数として利用できるようにする
+
+    例：通常の数値計算を行うような感覚で計算できる
+    >>> x = Variable(np.array(0.5))
+    >>> y = square(exp(square(x)))  # 関数を連続して適用
+    >>> y.grad = np.array(1.0)
+    >>> y.backward()
+    >>> print(x.grad)
+    3.297442541400256
+    """
+    return Exp()(x)

@@ -19,7 +19,7 @@ import numpy as np
 class Variable:
     """「箱」（データを持つ存在）としての変数を表すクラス
 
-    data属性にデータが保持される
+    data属性にデータが保持される（データはNoneかnp.ndarrayに限る）
     creator属性に計算グラフのつながりの情報が保持される
 
     backwardメソッドにより（関数のbackwardメソッドと連携して）逆伝播を求める
@@ -31,9 +31,19 @@ class Variable:
     >>> x.data = np.array(2.0)
     >>> print(x.data)
     2.0
+
+    >>> x = Variable(None)
+    >>> x = Variable(1.0)
+    Traceback (most recent call last):
+      ...
+    TypeError: <class 'float'> is not supported
     """
 
     def __init__(self, data):
+        if data is not None:
+            if not isinstance(data, np.ndarray):
+                raise TypeError(f"{type(data)} is not supported")
+
         self.data = data  # 通常値
         self.grad = None  # 通常値に対応する微分値
         self.creator = None  # 変数の生みの親となる関数（関数以外が生み出した変数の場合はNone）

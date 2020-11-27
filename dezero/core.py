@@ -16,6 +16,40 @@ x.grad <- A.backward <- a.grad <- B.backward <- b.grad
 import numpy as np
 
 
+def as_array(x):
+    """xがスカラ型（scalar type＝ndarrayでない）であれば、ndarrayに変換して返す関数
+
+    0次のndarrayの計算結果（スカラ型＝ndarrayでない）をndarrayに変換するのに使う
+    （X次のndarrayは[]をX個使ったリストをnp.arrayに渡している）
+
+    >>> x = np.array([1.0])
+    >>> y = x ** 2
+    >>> print(type(x), x.ndim)
+    <class 'numpy.ndarray'> 1
+    >>> print(type(y))
+    <class 'numpy.ndarray'>
+    >>> x = np.array(1.0)
+    >>> y = x ** 2
+    >>> print(type(x), x.ndim)
+    <class 'numpy.ndarray'> 0
+    >>> print(type(y))
+    <class 'numpy.float64'>
+
+    >>> np.isscalar(np.float64(1.0))
+    True
+    >>> np.isscalar(2.0)
+    True
+    >>> np.isscalar(np.array(1.0))
+    False
+    >>> np.isscalar(np.array([1, 2, 3]))
+    False
+    """
+
+    if np.isscalar(x):
+        return np.array(x)
+    return x
+
+
 class Variable:
     """「箱」（データを持つ存在）としての変数を表すクラス
 
@@ -82,7 +116,7 @@ class Function:
     def __call__(self, input: "Variable") -> "Variable":
         x = input.data  # actual data
         y = self.forward(x)
-        output = Variable(y)
+        output = Variable(as_array(y))
         # make output Variable remember the creator Function
         output.set_creator(self)
         self.input = input  # store input Variable

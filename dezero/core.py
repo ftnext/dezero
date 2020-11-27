@@ -188,8 +188,8 @@ def numerical_diff(f: Function, x: Variable, eps=1e-4):
     4.000000000004
     """
 
-    x0 = Variable(x.data - eps)
-    x1 = Variable(x.data + eps)
+    x0 = Variable(np.array(x.data - eps))
+    x1 = Variable(np.array(x.data + eps))
     y0 = f(x0)
     y1 = f(x1)
     return (y1.data - y0.data) / (2 * eps)

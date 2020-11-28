@@ -13,6 +13,8 @@ x.grad <- A.backward <- a.grad <- B.backward <- b.grad
 ※ A.backwardに「A'(x)（=変数）の乗算」を内包している
 """
 
+from typing import Iterable, List
+
 import numpy as np
 
 
@@ -113,15 +115,17 @@ class Function:
     順伝播が計算されるときに、箱（変数）に計算グラフのつながりを記録する
     """
 
-    def __call__(self, input: "Variable") -> "Variable":
-        x = input.data  # actual data
-        y = self.forward(x)
-        output = Variable(as_array(y))
+    def __call__(self, inputs: Iterable["Variable"]) -> List["Variable"]:
+        xs = [x.data for x in inputs]  # actual data
+        ys = self.forward(xs)
+        outputs = [Variable(as_array(y)) for y in ys]
+
         # make output Variable remember the creator Function
-        output.set_creator(self)
-        self.input = input  # store input Variable
-        self.output = output  # store output Variable
-        return output
+        for output in outputs:
+            output.set_creator(self)
+        self.inputs = inputs  # store input Variables
+        self.outputs = outputs  # store output Variables
+        return outputs
 
     def forward(self, x):
         """通常の具体的な計算（順伝播）

@@ -2,7 +2,7 @@ from unittest import TestCase
 
 import numpy as np
 
-from dezero.core import square, Variable
+from dezero.core import numerical_diff, square, Variable
 
 
 class SquareTestCase(TestCase):
@@ -22,3 +22,13 @@ class SquareTestCase(TestCase):
 
         expected = np.array(6.0)  # 2x (x=3.0)
         self.assertEqual(x.grad, expected)
+
+    def test_gradient_check(self):
+        x = Variable(np.random.rand(1))  # dim=1 ndarray
+        y = square(x)
+
+        y.backward()
+
+        num_grad = numerical_diff(square, x)
+        flg = np.allclose(x.grad, num_grad)
+        self.assertTrue(flg)

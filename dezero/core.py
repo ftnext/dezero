@@ -144,6 +144,25 @@ class Function:
         raise NotImplementedError
 
 
+class Add(Function):
+    """入力された2つの値を足し算する、具体的な関数
+
+    >>> xs = [Variable(np.array(2)), Variable(np.array(3))]
+    >>> f = Add()
+    >>> ys = f(xs)
+    >>> type(ys)
+    <class 'list'>
+    >>> y = ys[0]
+    >>> print(y.data)
+    5
+    """
+
+    def forward(self, xs):
+        x0, x1 = xs
+        y = x0 + x1
+        return (y,)
+
+
 class Square(Function):
     """入力された値を2乗する、具体的な関数
 

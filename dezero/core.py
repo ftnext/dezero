@@ -119,7 +119,10 @@ class Function:
         self, *inputs: Iterable["Variable"]
     ) -> Union[List["Variable"], "Variable"]:
         xs = [x.data for x in inputs]  # actual data
-        ys = self.forward(xs)
+        ys = self.forward(*xs)  # unpack and pass to the method
+        # when forward method returns the only 1 element
+        if not isinstance(ys, tuple):
+            ys = (ys,)
         outputs = [Variable(as_array(y)) for y in ys]
 
         # make output Variable remember the creator Function
@@ -158,10 +161,9 @@ class Add(Function):
     5
     """
 
-    def forward(self, xs):
-        x0, x1 = xs
+    def forward(self, x0, x1):
         y = x0 + x1
-        return (y,)
+        return y
 
 
 class Square(Function):

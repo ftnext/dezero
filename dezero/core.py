@@ -166,6 +166,18 @@ class Add(Function):
         return y
 
 
+def add(x0: "Variable", x1: "Variable"):
+    """足し算の関数のクラスをPythonの関数として利用できるようにする
+
+    >>> x0 = Variable(np.array(2))
+    >>> x1 = Variable(np.array(3))
+    >>> y = add(x0, x1)
+    >>> print(y.data)
+    5
+    """
+    return Add()(x0, x1)
+
+
 class Square(Function):
     """入力された値を2乗する、具体的な関数
 

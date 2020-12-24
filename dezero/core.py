@@ -83,9 +83,12 @@ class Variable:
         self.data = data  # 通常値
         self.grad = None  # 通常値に対応する微分値
         self.creator = None  # 変数の生みの親となる関数（関数以外が生み出した変数の場合はNone）
+        self.generation = 0  # どの世代の変数・関数かを示す
 
     def set_creator(self, func: "Function"):
         self.creator = func
+        # Variables are only 1 generation larger than their creator Functions.
+        self.generation = func.generation + 1
 
     def backward(self):
         # https://numpy.org/doc/stable/reference/generated/numpy.ones_like.html
@@ -143,6 +146,7 @@ class Function:
         if not isinstance(ys, tuple):
             ys = (ys,)
         outputs = [Variable(as_array(y)) for y in ys]
+        self.generation = max([x.generation for x in inputs])
 
         # make output Variable remember the creator Function
         for output in outputs:

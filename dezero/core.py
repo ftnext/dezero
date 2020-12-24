@@ -108,7 +108,14 @@ class Variable:
                 if x.grad is None:  # when set grad for the first time
                     x.grad = gx
                 else:  # add grad for the same Variable
+                    # x.grad is created NEWLY
                     x.grad = x.grad + gx
+                    # if wrote x.grad += gx (in-place)
+                    # ex. y = add(x, x) gxs[0], gxs[1], y.grad are same ID
+                    # (because of add's backward)
+                    # and x.grad is the same ID (x.grad = gx)
+                    # then x.grad += gx updates x.grad AND y.grad
+                    # In the result, y.grad is not 1 (BUG!)
 
                 # stop when x (Variable) is not created by Function
                 if x.creator is not None:

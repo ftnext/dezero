@@ -105,7 +105,11 @@ class Variable:
 
             # gxs[i] is grad of f.inputs[i] (variable arguments)
             for x, gx in zip(f.inputs, gxs):
-                x.grad = gx
+                if x.grad is None:  # when set grad for the first time
+                    x.grad = gx
+                else:  # add grad for the same Variable
+                    x.grad = x.grad + gx
+
                 # stop when x (Variable) is not created by Function
                 if x.creator is not None:
                     funcs.append(x.creator)  # append the prior Function
@@ -198,6 +202,21 @@ def add(x0: "Variable", x1: "Variable"):
     4.0
     >>> print(y.grad)
     6.0
+
+    同じ変数を使って足し算を行う
+    >>> x = Variable(np.array(3.0))
+    >>> y = add(x, x)
+    >>> print("y", y.data)
+    y 6.0
+    >>> y.backward()  # y = 2x より dy/dx = 2
+    >>> print("x.grad", x.grad)
+    x.grad 2.0
+
+    >>> x = Variable(np.array(3.0))
+    >>> y = add(add(x, x), x)  # y = 3x
+    >>> y.backward()
+    >>> print(x.grad)
+    3.0
     """
     return Add()(x0, x1)
 

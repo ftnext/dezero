@@ -97,7 +97,17 @@ class Variable:
             # data and grad are the same dtype
             self.grad = np.ones_like(self.data)
 
-        funcs = [self.creator]
+        funcs = []
+        seen_set = set()
+
+        def add_func(f):
+            if f not in seen_set:
+                funcs.append(f)
+                seen_set.add(f)
+                funcs.sort(key=lambda x: x.generation)
+
+        add_func(self.creator)
+
         while funcs:
             f = funcs.pop()  # get Function
             # handle output Variables (variable arguments) of the Function
@@ -122,7 +132,7 @@ class Variable:
 
                 # stop when x (Variable) is not created by Function
                 if x.creator is not None:
-                    funcs.append(x.creator)  # append the prior Function
+                    add_func(x.creator)
 
     def cleargrad(self):
         self.grad = None
@@ -232,6 +242,17 @@ def add(x0: "Variable", x1: "Variable"):
     >>> y.backward()
     >>> print(x.grad)
     3.0
+
+    一直線ではない計算グラフの例
+    >>> x = Variable(np.array(2.0))
+    >>> a = square(x)
+    >>> # y = 2 * x**4 = (x**2)**2 + (x**2)**2
+    >>> y = add(square(a), square(a))
+    >>> y.backward()  # dy/dx = 8 x**3
+    >>> print(y.data)
+    32.0
+    >>> print(x.grad)
+    64.0
     """
     return Add()(x0, x1)
 

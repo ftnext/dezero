@@ -97,13 +97,18 @@ class Variable:
         funcs = [self.creator]
         while funcs:
             f = funcs.pop()  # get Function
-            # get input and output Variable of the Function
-            # f.output is self (for maintainability for branch of graph?)
-            x, y = f.input, f.output
-            x.grad = f.backward(y.grad)
-            # stop when x (Variable) is not created by Function
-            if x.creator is not None:
-                funcs.append(x.creator)  # append the prior Function
+            # handle output Variables (variable arguments) of the Function
+            gys = [output.grad for output in f.outputs]
+            gxs = f.backward(*gys)
+            if not isinstance(gxs, tuple):
+                gxs = (gxs,)
+
+            # gxs[i] is grad of f.inputs[i] (variable arguments)
+            for x, gx in zip(f.inputs, gxs):
+                x.grad = gx
+                # stop when x (Variable) is not created by Function
+                if x.creator is not None:
+                    funcs.append(x.creator)  # append the prior Function
 
 
 class Function:
@@ -164,6 +169,13 @@ class Add(Function):
     def forward(self, x0, x1):
         y = x0 + x1
         return y
+
+    def backward(self, gy):
+        """足し算の逆伝播は、上流の微分をそのまま流す
+
+        y = x0 + x1 のとき dy/dx0 = 1, dy/dx1 = 1 より1をかける＝そのまま
+        """
+        return gy, gy
 
 
 def add(x0: "Variable", x1: "Variable"):

@@ -121,6 +121,9 @@ class Variable:
                 if x.creator is not None:
                     funcs.append(x.creator)  # append the prior Function
 
+    def cleargrad(self):
+        self.grad = None
+
 
 class Function:
     """ある変数から別の変数への対応関係を定めるものである、関数の基底クラス
@@ -219,7 +222,8 @@ def add(x0: "Variable", x1: "Variable"):
     >>> print("x.grad", x.grad)
     x.grad 2.0
 
-    >>> x = Variable(np.array(3.0))
+    メモリの節約のために、同じxを使って、別の計算を行う
+    >>> x.cleargrad()  # 別の計算をする前に微分の初期化
     >>> y = add(add(x, x), x)  # y = 3x
     >>> y.backward()
     >>> print(x.grad)

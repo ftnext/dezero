@@ -186,6 +186,18 @@ def add(x0: "Variable", x1: "Variable"):
     >>> y = add(x0, x1)
     >>> print(y.data)
     5
+
+    z = x**2 + y**2
+    >>> x = Variable(np.array(2.0))
+    >>> y = Variable(np.array(3.0))
+    >>> z = add(square(x), square(y))
+    >>> z.backward()
+    >>> print(z.data)
+    13.0
+    >>> print(x.grad)
+    4.0
+    >>> print(y.grad)
+    6.0
     """
     return Add()(x0, x1)
 

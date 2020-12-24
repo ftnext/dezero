@@ -212,7 +212,8 @@ class Square(Function):
         dy/dx = 2 * x
         gyは出力側から渡される微分（ndarray）
         """
-        x = self.input.data
+        # concrete function knows the number of inputs
+        x = self.inputs[0].data
         gx = 2 * x * gy
         return gx
 
@@ -231,11 +232,11 @@ class Exp(Function):
 
     自動で作られた計算グラフを逆向きに辿る（Define-by-Run）
     >>> assert y.creator == C
-    >>> assert y.creator.input == b
-    >>> assert y.creator.input.creator == B
-    >>> assert y.creator.input.creator.input == a
-    >>> assert y.creator.input.creator.input.creator == A
-    >>> assert y.creator.input.creator.input.creator.input == x
+    >>> assert y.creator.inputs[0] == b
+    >>> assert y.creator.inputs[0].creator == B
+    >>> assert y.creator.inputs[0].creator.inputs[0] == a
+    >>> assert y.creator.inputs[0].creator.inputs[0].creator == A
+    >>> assert y.creator.inputs[0].creator.inputs[0].creator.inputs[0] == x
 
     逆伝播を求める
     >>> y.backward()
@@ -253,7 +254,7 @@ class Exp(Function):
 
         dy/dx = e ** x
         """
-        x = self.input.data
+        x = self.inputs[0].data
         gx = np.exp(x) * gy
         return gx
 

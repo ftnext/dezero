@@ -13,6 +13,7 @@ x.grad <- A.backward <- a.grad <- B.backward <- b.grad
 ※ A.backwardに「A'(x)（=変数）の乗算」を内包している
 """
 
+import weakref
 from typing import Iterable, List, Union
 
 import numpy as np
@@ -110,8 +111,8 @@ class Variable:
 
         while funcs:
             f = funcs.pop()  # get Function
-            # handle output Variables (variable arguments) of the Function
-            gys = [output.grad for output in f.outputs]
+            # handle weak references to output Variables (variable arguments)
+            gys = [output().grad for output in f.outputs]
             gxs = f.backward(*gys)
             if not isinstance(gxs, tuple):
                 gxs = (gxs,)
@@ -162,7 +163,8 @@ class Function:
         for output in outputs:
             output.set_creator(self)
         self.inputs = inputs  # store input Variables
-        self.outputs = outputs  # store output Variables
+        # store weak references, not to create circular references
+        self.outputs = [weakref.ref(output) for output in outputs]
         # If the number of elements is 1, return the first Variable
         return outputs if len(outputs) > 1 else outputs[0]
 
@@ -385,3 +387,10 @@ def exp(x):
     3.297442541400256
     """
     return Exp()(x)
+
+
+if __name__ == "__main__":
+    # メモリ使用量を見て、循環参照を解決したことを確認
+    for i in range(10):
+        x = Variable(np.random.randn(10000))
+        y = square(square(square(x)))

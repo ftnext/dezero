@@ -13,6 +13,7 @@ x.grad <- A.backward <- a.grad <- B.backward <- b.grad
 ※ A.backwardに「A'(x)（=変数）の乗算」を内包している
 """
 
+import contextlib
 import weakref
 from typing import Iterable, List, Union
 
@@ -60,6 +61,23 @@ class Config:
     """
 
     enable_backprop = True
+
+
+@contextlib.contextmanager
+def using_config(name: str, value):
+    """Configを切り替える関数（with文で使う想定）
+
+    >>> with using_config("enable_backprop", False):
+    ...     x = Variable(np.array(2.0))
+    ...     y = square(x)
+    ...
+    """
+    old_value = getattr(Config, name)
+    setattr(Config, name, value)
+    try:
+        yield
+    finally:
+        setattr(Config, name, old_value)
 
 
 class Variable:

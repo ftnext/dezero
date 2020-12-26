@@ -53,6 +53,15 @@ def as_array(x):
     return x
 
 
+class Config:
+    """設定のためのデータ
+
+    クラスを使うことで、設定のためのデータは常に1つだけ存在する
+    """
+
+    enable_backprop = True
+
+
 class Variable:
     """「箱」（データを持つ存在）としての変数を表すクラス
 
@@ -162,14 +171,17 @@ class Function:
         if not isinstance(ys, tuple):
             ys = (ys,)
         outputs = [Variable(as_array(y)) for y in ys]
-        self.generation = max([x.generation for x in inputs])
 
-        # make output Variable remember the creator Function
-        for output in outputs:
-            output.set_creator(self)
-        self.inputs = inputs  # store input Variables
-        # store weak references, not to create circular references
-        self.outputs = [weakref.ref(output) for output in outputs]
+        if Config.enable_backprop:
+            self.generation = max([x.generation for x in inputs])
+
+            # make output Variable remember the creator Function
+            for output in outputs:
+                output.set_creator(self)
+            self.inputs = inputs  # store input Variables
+            # store weak references, not to create circular references
+            self.outputs = [weakref.ref(output) for output in outputs]
+
         # If the number of elements is 1, return the first Variable
         return outputs if len(outputs) > 1 else outputs[0]
 

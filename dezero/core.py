@@ -91,7 +91,7 @@ class Variable:
         # Variables are only 1 generation larger than their creator Functions.
         self.generation = func.generation + 1
 
-    def backward(self):
+    def backward(self, retain_grad=False):
         # https://numpy.org/doc/stable/reference/generated/numpy.ones_like.html
         if self.grad is None:
             # grad is ones because of dy/dy(= 1)
@@ -134,6 +134,11 @@ class Variable:
                 # stop when x (Variable) is not created by Function
                 if x.creator is not None:
                     add_func(x.creator)
+
+            # reset grads of Function's outputs (or intermediate Variables)
+            if not retain_grad:
+                for y in f.outputs:
+                    y().grad = None  # y is weakref
 
     def cleargrad(self):
         self.grad = None
@@ -255,6 +260,17 @@ def add(x0: "Variable", x1: "Variable"):
     32.0
     >>> print(x.grad)
     64.0
+
+    途中の変数の微分をリセット
+    >>> x0 = Variable(np.array(1.0))
+    >>> x1 = Variable(np.array(1.0))
+    >>> t = add(x0, x1)
+    >>> y = add(x0, t)  # y = 2*x0 + x1
+    >>> y.backward()
+    >>> print(y.grad, t.grad)
+    None None
+    >>> print(x0.grad, x1.grad)
+    2.0 1.0
     """
     return Add()(x0, x1)
 

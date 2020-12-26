@@ -80,6 +80,17 @@ def using_config(name: str, value):
         setattr(Config, name, old_value)
 
 
+def no_grad():
+    """逆伝播が不要と指定する時に使う関数
+
+    >>> with no_grad():
+    ...     x = Variable(np.array(2.0))
+    ...     y = square(x)
+    ...
+    """
+    return using_config("enable_backprop", False)
+
+
 class Variable:
     """「箱」（データを持つ存在）としての変数を表すクラス
 

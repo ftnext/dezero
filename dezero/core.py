@@ -141,6 +141,18 @@ class Variable:
     >>> y = a * b
     >>> print(y)
     variable(6.0)
+
+    >>> a = Variable(np.array(3.0))
+    >>> b = Variable(np.array(2.0))
+    >>> c = Variable(np.array(1.0))
+    >>> y = a * b + c
+    >>> y.backward()
+    >>> print(y)
+    variable(7.0)
+    >>> print(a.grad)  # dy/da = b
+    2.0
+    >>> print(b.grad)
+    3.0
     """
 
     def __init__(self, data, name=None):
@@ -235,9 +247,6 @@ class Variable:
             return "variable(None)"
         p = str(self.data).replace("\n", "\n" + " " * 9)
         return "variable(" + p + ")"
-
-    def __mul__(self, other):
-        return mul(self, other)
 
 
 class Function:
@@ -387,21 +396,12 @@ class Mul(Function):
 
 
 def mul(x0, x1):
-    """掛け算の関数のクラスをPythonの関数として利用できるようにする
-
-    >>> a = Variable(np.array(3.0))
-    >>> b = Variable(np.array(2.0))
-    >>> c = Variable(np.array(1.0))
-    >>> y = add(mul(a, b), c)  # y = a*b + c
-    >>> y.backward()
-    >>> print(y)
-    variable(7.0)
-    >>> print(a.grad)  # dy/da = b
-    2.0
-    >>> print(b.grad)
-    3.0
-    """
+    """掛け算の関数のクラスをPythonの関数として利用できるようにする"""
     return Mul()(x0, x1)
+
+
+Variable.__mul__ = mul
+Variable.__add__ = add
 
 
 class Square(Function):

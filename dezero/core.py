@@ -174,7 +174,16 @@ class Variable:
     >>> y = 3.0 * x + 1.0
     >>> print(y)
     variable(7.0)
+
+    >>> x = Variable(np.array([1.0]))
+    >>> y = np.array([2.0]) + x  # Variable's __array_priority__ works
+    >>> print(y)
+    variable([3.])
     """
+
+    # take Variable's __radd__ priority over ndarray's __add__
+    # https://numpy.org/doc/stable/reference/arrays.classes.html#numpy.class.__array_priority__
+    __array_priority__ = 200
 
     def __init__(self, data, name=None):
         if data is not None:

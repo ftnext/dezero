@@ -164,6 +164,16 @@ class Variable:
     >>> y = x + np.array(3.0)  # add ndarray to Variable
     >>> print(y)
     variable(5.0)
+
+    >>> x = Variable(np.array(2.0))
+    >>> y = x + 3.0  # convert to array in concrete functions
+    >>> print(y)
+    variable(5.0)
+
+    >>> x = Variable(np.array(2.0))
+    >>> y = 3.0 * x + 1.0
+    >>> print(y)
+    variable(7.0)
     """
 
     def __init__(self, data, name=None):
@@ -393,6 +403,7 @@ def add(x0: "Variable", x1: "Variable"):
     >>> print(x0.grad, x1.grad)
     2.0 1.0
     """
+    x1 = as_array(x1)
     return Add()(x0, x1)
 
 
@@ -410,11 +421,14 @@ class Mul(Function):
 
 def mul(x0, x1):
     """掛け算の関数のクラスをPythonの関数として利用できるようにする"""
+    x1 = as_array(x1)
     return Mul()(x0, x1)
 
 
 Variable.__mul__ = mul
+Variable.__rmul__ = mul
 Variable.__add__ = add
+Variable.__radd__ = add
 
 
 class Square(Function):

@@ -122,6 +122,19 @@ class Variable:
     6
     >>> print(x.dtype)
     int64
+    >>> print(len(x))
+    2
+
+    >>> x = Variable(np.array([1, 2, 3]))
+    >>> print(x)
+    variable([1 2 3])
+    >>> x = Variable(None)
+    >>> print(x)
+    variable(None)
+    >>> x = Variable(np.array([[1, 2, 3], [4, 5, 6]]))
+    >>> print(x)
+    variable([[1 2 3]
+              [4 5 6]])
     """
 
     def __init__(self, data, name=None):
@@ -207,6 +220,15 @@ class Variable:
     @property
     def dtype(self):
         return self.data.dtype
+
+    def __len__(self):
+        return len(self.data)
+
+    def __repr__(self):
+        if self.data is None:
+            return "variable(None)"
+        p = str(self.data).replace("\n", "\n" + " " * 9)
+        return "variable(" + p + ")"
 
 
 class Function:

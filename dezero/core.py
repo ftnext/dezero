@@ -54,6 +54,12 @@ def as_array(x):
     return x
 
 
+def as_variable(obj: Union["Variable", "np.ndarray"]) -> "Variable":
+    if isinstance(obj, Variable):
+        return obj
+    return Variable(obj)
+
+
 class Config:
     """設定のためのデータ
 
@@ -153,6 +159,11 @@ class Variable:
     2.0
     >>> print(b.grad)
     3.0
+
+    >>> x = Variable(np.array(2.0))
+    >>> y = x + np.array(3.0)  # add ndarray to Variable
+    >>> print(y)
+    variable(5.0)
     """
 
     def __init__(self, data, name=None):
@@ -259,8 +270,10 @@ class Function:
     """
 
     def __call__(
-        self, *inputs: Iterable["Variable"]
+        self, *inputs: Iterable[Union["Variable", "np.ndarray"]]
     ) -> Union[List["Variable"], "Variable"]:
+        # convert each inputs to Variable
+        inputs = [as_variable(x) for x in inputs]
         xs = [x.data for x in inputs]  # actual data
         ys = self.forward(*xs)  # unpack and pass to the method
         # when forward method returns the only 1 element

@@ -114,12 +114,13 @@ class Variable:
     TypeError: <class 'float'> is not supported
     """
 
-    def __init__(self, data):
+    def __init__(self, data, name=None):
         if data is not None:
             if not isinstance(data, np.ndarray):
                 raise TypeError(f"{type(data)} is not supported")
 
         self.data = data  # 通常値
+        self.name = name  # 変数の名前
         self.grad = None  # 通常値に対応する微分値
         self.creator = None  # 変数の生みの親となる関数（関数以外が生み出した変数の場合はNone）
         self.generation = 0  # どの世代の変数・関数かを示す

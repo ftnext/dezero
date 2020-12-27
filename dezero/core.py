@@ -135,6 +135,12 @@ class Variable:
     >>> print(x)
     variable([[1 2 3]
               [4 5 6]])
+
+    >>> a = Variable(np.array(3.0))
+    >>> b = Variable(np.array(2.0))
+    >>> y = a * b
+    >>> print(y)
+    variable(6.0)
     """
 
     def __init__(self, data, name=None):
@@ -229,6 +235,9 @@ class Variable:
             return "variable(None)"
         p = str(self.data).replace("\n", "\n" + " " * 9)
         return "variable(" + p + ")"
+
+    def __mul__(self, other):
+        return mul(self, other)
 
 
 class Function:

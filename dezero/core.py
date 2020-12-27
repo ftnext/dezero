@@ -112,6 +112,16 @@ class Variable:
     Traceback (most recent call last):
       ...
     TypeError: <class 'float'> is not supported
+
+    >>> x = Variable(np.array([[1, 2, 3], [4, 5, 6]]))
+    >>> print(x.shape)
+    (2, 3)
+    >>> print(x.ndim)
+    2
+    >>> print(x.size)
+    6
+    >>> print(x.dtype)
+    int64
     """
 
     def __init__(self, data, name=None):
@@ -181,6 +191,22 @@ class Variable:
 
     def cleargrad(self):
         self.grad = None
+
+    @property
+    def shape(self):
+        return self.data.shape
+
+    @property
+    def ndim(self):
+        return self.data.ndim
+
+    @property
+    def size(self):
+        return self.data.size
+
+    @property
+    def dtype(self):
+        return self.data.dtype
 
 
 class Function:

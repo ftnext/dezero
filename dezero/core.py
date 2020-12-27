@@ -365,6 +365,36 @@ def add(x0: "Variable", x1: "Variable"):
     return Add()(x0, x1)
 
 
+class Mul(Function):
+    """入力された2つの値を掛け算(Multiply)する、具体的な関数"""
+
+    def forward(self, x0, x1):
+        y = x0 * x1
+        return y
+
+    def backward(self, gy):
+        x0, x1 = self.inputs[0].data, self.inputs[1].data
+        return gy * x1, gy * x0
+
+
+def mul(x0, x1):
+    """掛け算の関数のクラスをPythonの関数として利用できるようにする
+
+    >>> a = Variable(np.array(3.0))
+    >>> b = Variable(np.array(2.0))
+    >>> c = Variable(np.array(1.0))
+    >>> y = add(mul(a, b), c)  # y = a*b + c
+    >>> y.backward()
+    >>> print(y)
+    variable(7.0)
+    >>> print(a.grad)  # dy/da = b
+    2.0
+    >>> print(b.grad)
+    3.0
+    """
+    return Mul()(x0, x1)
+
+
 class Square(Function):
     """入力された値を2乗する、具体的な関数
 
